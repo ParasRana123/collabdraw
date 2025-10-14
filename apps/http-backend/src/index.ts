@@ -1,11 +1,12 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./config";
+import { middlware } from "./middleware";
 
 const app = express();
 
 app.post("/signup" , (req , res) => {
-
+    // db-call
 })
 
 app.post("/signin" , (req , res) => {
@@ -20,8 +21,12 @@ app.post("/signin" , (req , res) => {
     })
 })
 
-app.post("/room" , (req , res) => {
+app.post("/room" , middlware , (req , res) => {
+    // db-call
 
+    res.json({
+        roomId: "123"
+    })
 })
 
 app.listen(3000);

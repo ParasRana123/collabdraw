@@ -4,10 +4,11 @@ import { middlware } from "./middleware.js";
 import { CreateRoomSchema , CreateSignInSchema , CreateUserSchema } from "@repo/common/types";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { prismaClient } from "@repo/db/client";
-import { ca } from "zod/locales";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/signup", async (req, res) => {
   const parsedData = CreateUserSchema.safeParse(req.body);
@@ -103,5 +104,22 @@ app.post("/room", middlware, async (req, res) => {
     });
   }
 });
+
+app.get("/chat/:roomId" , async (req , res) => {
+  const roomId = Number(req.params.roomId);
+  const messages = await prismaClient.chat.findMany({
+    where: {
+      roomId: roomId
+    },
+    orderBy: {
+      id: "desc"
+    },
+    take: 50,
+  });
+
+  res.json({
+    messages
+  })
+})
 
 app.listen(3001);

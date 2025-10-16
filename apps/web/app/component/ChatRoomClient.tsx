@@ -31,7 +31,7 @@ export function ChatRoomCient({
     } , [socket , loading , id])
 
     return <div>
-        {messages.map(m => <div>{m.message}</div>)}
+        {chats.map(m => <div>{m.message}</div>)}
         <input type="text" value={currentMessage} onChange={e => {
             setCurrentMessage(e.target.value);
         }}/>
@@ -39,7 +39,7 @@ export function ChatRoomCient({
             socket?.send(JSON.stringify({
                 type: "chat",
                 roomId: id,
-                messages: currentMessage
+                message: currentMessage
             }))
 
             setCurrentMessage("");

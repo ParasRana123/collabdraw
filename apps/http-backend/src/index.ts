@@ -1,7 +1,11 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { middlware } from "./middleware.js";
-import { CreateRoomSchema , CreateSignInSchema , CreateUserSchema } from "@repo/common/types";
+import {
+  CreateRoomSchema,
+  CreateSignInSchema,
+  CreateUserSchema,
+} from "@repo/common/types";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { prismaClient } from "@repo/db/client";
 import cors from "cors";
@@ -105,34 +109,38 @@ app.post("/room", middlware, async (req, res) => {
   }
 });
 
-app.get("/chat/:roomId" , async (req , res) => {
-  const roomId = Number(req.params.roomId);
-  const messages = await prismaClient.chat.findMany({
-    where: {
-      roomId: roomId
-    },
-    orderBy: {
-      id: "desc"
-    },
-    take: 50,
-  });
+app.get("/chat/:roomId", async (req, res) => {
+  try {
+    const roomId = Number(req.params.roomId);
+    const messages = await prismaClient.chat.findMany({
+      where: {
+        roomId: roomId,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      take: 50,
+    });
 
-  res.json({
-    messages
-  })
-})
+    res.json({
+      messages,
+    });
+  } catch (error) {
+    console.log("error fetching the chats: " , error);
+  }
+});
 
-app.get("/room/:slug" , async (req , res) => {
+app.get("/room/:slug", async (req, res) => {
   const slug = req.params.slug;
   const room = await prismaClient.room.findFirst({
     where: {
-      slug
-    }
+      slug,
+    },
   });
 
   res.json({
-    room
-  })
-})
+    room,
+  });
+});
 
 app.listen(3001);

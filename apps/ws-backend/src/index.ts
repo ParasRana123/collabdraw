@@ -106,7 +106,7 @@ wss.on("connection", function connection(ws, request) {
 
       console.log("in brodacsting");
       users.forEach((user) => {
-        if (user.rooms.includes(roomId as unknown as string)) {
+        if (user.rooms.includes(parsedData.roomId)) {
           user.ws.send(
             JSON.stringify({
               type: "chat",

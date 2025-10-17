@@ -2,6 +2,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { prismaClient } from "@repo/db/client";
+import { int, unknown } from "zod";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -89,7 +90,7 @@ wss.on("connection", function connection(ws, request) {
     }
 
     if (parsedData.type == "chat") {
-      const roomId = parsedData.roomId;
+      const roomId = Number(parsedData.roomId);
       const message = parsedData.message;
       const slug = parsedData.slug;
 
@@ -105,7 +106,7 @@ wss.on("connection", function connection(ws, request) {
 
       console.log("in brodacsting");
       users.forEach((user) => {
-        if (user.rooms.includes(roomId)) {
+        if (user.rooms.includes(roomId as unknown as string)) {
           user.ws.send(
             JSON.stringify({
               type: "chat",

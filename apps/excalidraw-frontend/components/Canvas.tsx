@@ -3,47 +3,37 @@ import { useEffect , useRef, useState } from "react";
 import { IconButton } from "./IconButton";
 import { Circle, Pencil, RectangleHorizontalIcon } from "lucide-react";
 
-type Shape = "circle" | "rect" | "pencil";
+type Shape = "circle" | "rect" | "line" | "point";
 
 export function Canvas({ roomId , socket } : {roomId: string , socket: WebSocket}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [selectedTool , setSelectedTool] = useState<Shape>("circle");
+    const [selectedShape , setSelectedShape] = useState<Shape>("circle");
 
     useEffect(() => {
         if(canvasRef.current) {
-            initDraw(canvasRef.current , roomId , socket);
+            initDraw(canvasRef.current , roomId , socket , selectedShape);
         }
-    } , [canvasRef])
+    } , [ canvasRef , selectedShape ])
 
     return <div style={{
         height: "100vh",
         overflow: "hidden"
     }}>
 
-        <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight}></canvas>
-        <Topbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
-    </div>
-}
+        <button className={`px-3 py-1 ${selectedShape === "rect" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedShape("rect");y
+            
+        }}>Rectangle</button>
+        <button className={`px-3 py-1  ${selectedShape === "circle" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedShape("circle");
+        }}>Circle</button>
+        <button className={`px-3 py-1  ${selectedShape === "line" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedShape("line");
+        }}>Line</button>
+        <button className={`px-3 py-1  ${selectedShape === "point" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedShape("point");
+        }}>Point</button>
 
-function Topbar({selectedTool , setSelectedTool} : {
-    selectedTool: Shape,
-    setSelectedTool: (s: Shape) => void
-}) {
-        return <div style={{
-            position: "fixed",
-            top: 10,
-            bottom: 10
-        }}>
-            <div className="flex gap-t">
-                <IconButton onClick = {() => {
-                    setSelectedTool("pencil")
-                }} activated={selectedTool === "pencil"} icon={<Pencil />}></IconButton>
-                <IconButton onClick = {() => {
-                    setSelectedTool("rect")
-                }} activated={selectedTool === "rect"} icon={<RectangleHorizontalIcon />}></IconButton>
-                <IconButton onClick = {() => {
-                    setSelectedTool("circle")
-                }} activated={selectedTool === "circle"} icon={<Circle />}></IconButton>
-            </div>
-        </div>
+        <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight}></canvas>
+    </div>
 }

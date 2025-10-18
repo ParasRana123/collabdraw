@@ -1,20 +1,27 @@
 import axios from "axios";
 import { HTTP_BACKEND } from "@/config";
 
-type Shape = {
-    type: "rect";
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-} | {
-    type: "circle";
-    centerX: number;
-    centerY: number;
-    radius: number
-}
+type Shape =
+  | {
+      type: "rect";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }
+  | {
+      type: "circle";
+      centerX: number;
+      centerY: number;
+      radius: number;
+    };
 
-export async function initDraw(canvas: HTMLCanvasElement , roomId: string , socket: WebSocket , shapeType: "rect" | "circle" | "line" | "point") {
+export async function initDraw(
+  canvas: HTMLCanvasElement,
+  roomId: string,
+  socket: WebSocket,
+  shapeType: "rect" | "circle" | "line" | "point"
+) {
   const ctx = canvas.getContext("2d");
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);
@@ -25,27 +32,27 @@ export async function initDraw(canvas: HTMLCanvasElement , roomId: string , sock
   socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
 
-    if(message.type == "chat") {
+    if (message.type == "chat") {
       const parsedShape = JSON.parse(message.message);
       existingShapes.push(parsedShape.shape);
-      clearCanvas(existingShapes , canvas , ctx);
+      clearCanvas(existingShapes, canvas, ctx);
     }
 
     console.log("going");
 
-    if(message.type == "stream_shape") {
+    if (message.type == "stream_shape") {
       console.log("in stream fe");
       const shape = message.shape;
-      clearCanvas(existingShapes , canvas , ctx);
+      clearCanvas(existingShapes, canvas, ctx);
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
-      ctx.strokeRect(shape.x , shape.y , shape.width , shape.height);
+      ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
       console.log("out stream fe");
     }
 
     console.log("going1");
-  }
+  };
 
-  clearCanvas(existingShapes , canvas , ctx);
+  clearCanvas(existingShapes, canvas, ctx);
 
   let clicked = false;
   let startX = 0;
@@ -64,71 +71,96 @@ export async function initDraw(canvas: HTMLCanvasElement , roomId: string , sock
     const width = e.clientX - startX;
     const height = e.clientY - startY;
     const shape: Shape = {
-        type: "rect",
-        x: startX,
-        y: startY,
-        height,
-        width
-    }
+      type: "rect",
+      x: startX,
+      y: startY,
+      height,
+      width,
+    };
 
-    existingShapes.push(shape)
+    existingShapes.push(shape);
 
-    socket.send(JSON.stringify({
-      type: "chat",
-      message: JSON.stringify({
-        shape
-      }),
-      roomId
-    }))
+    socket.send(
+      JSON.stringify({
+        type: "chat",
+        message: JSON.stringify({
+          shape,
+        }),
+        roomId,
+      })
+    );
   });
 
   canvas.addEventListener("mousemove", (e) => {
+    console.log("mouse move trigger");
+    const currentX = e.offsetX;
+    const currentY = e.offsetY;
+
     if (clicked) {
-      console.log("mouse move trigger");
       const width = e.clientX - startX;
       const height = e.clientY - startY;
-      clearCanvas(existingShapes , canvas , ctx);
+      clearCanvas(existingShapes, canvas, ctx);
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
-      ctx?.strokeRect(startX, startY, width, height);
 
-      socket.send(
-        JSON.stringify({
-          type: "stream_shape",
-          shape: {
-            type: "rect",
-            x: startX,
-            y: startY,
-            width,
-            height
-          },
-          roomId,
-        })
-      )
+      if (shapeType == "rect") {
+        ctx?.strokeRect(startX, startY, width, height);
+
+        socket.send(
+          JSON.stringify({
+            type: "stream_shape",
+            shape: {
+              type: "rect",
+              x: startX,
+              y: startY,
+              width,
+              height,
+            },
+            roomId,
+          })
+        );
+      } else if(shapeType == "circle") {
+        const centerX = startX + width / 2;
+        const centerY = startX + height / 2;
+        const radius = Math.max(width , height) / 2;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.closePath();
+      } else if(shapeType == "line") {
+        ctx.beginPath();
+        ctx.moveTo(startX , startY);
+        ctx.lineTo(currentX , currentY);
+        ctx.stroke();
+      }
     }
   });
 }
 
-function clearCanvas(existingShapes: Shape[] , canvas: HTMLCanvasElement , ctx: CanvasRenderingContext2D) {
-    ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "rgba(0 , 0 , 0)"; 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+function clearCanvas(
+  existingShapes: Shape[],
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D
+) {
+  ctx?.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0 , 0 , 0)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    existingShapes.map((shape) => {
-        if(shape.type == "rect") {
-            ctx.strokeStyle = "rgba(255 , 255 , 255)";
-            ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);
-        }
-    })
+  existingShapes.map((shape) => {
+    if (shape.type == "rect") {
+      ctx.strokeStyle = "rgba(255 , 255 , 255)";
+      ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    }
+  });
 }
 
 async function getExistingShapes(roomId: string) {
-    const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`);
-    const messages = res.data.messages;
+  const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`);
+  const messages = res.data.messages;
 
-    const shapes = messages.map((x : {message: string}) => {
-      const messageData = JSON.parse(x.message);
-      return messageData.shape;
-    })
+  const shapes = messages.map((x: { message: string }) => {
+    const messageData = JSON.parse(x.message);
+    return messageData.shape;
+  });
 
-    return shapes;
+  return shapes;
 }

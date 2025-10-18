@@ -15,14 +15,11 @@ export function Canvas({ roomId , socket } : {roomId: string , socket: WebSocket
         }
     } , [ canvasRef , selectedShape ])
 
-    return <div style={{
-        height: "100vh",
-        overflow: "hidden"
-    }}>
+    return <div>
 
         <button className={`px-3 py-1 ${selectedShape === "rect" ? "text-red-500" : "text-black"}`} onClick={() => {
-            setSelectedShape("rect");y
-            
+            setSelectedShape("rect");
+
         }}>Rectangle</button>
         <button className={`px-3 py-1  ${selectedShape === "circle" ? "text-red-500" : "text-black"}`} onClick={() => {
             setSelectedShape("circle");
@@ -34,6 +31,6 @@ export function Canvas({ roomId , socket } : {roomId: string , socket: WebSocket
             setSelectedShape("point");
         }}>Point</button>
 
-        <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight}></canvas>
+        <canvas ref={canvasRef} width={2000} height={1080}></canvas>
     </div>
 }

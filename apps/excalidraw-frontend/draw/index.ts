@@ -30,6 +30,19 @@ export async function initDraw(canvas: HTMLCanvasElement , roomId: string , sock
       existingShapes.push(parsedShape.shape);
       clearCanvas(existingShapes , canvas , ctx);
     }
+
+    console.log("going");
+
+    if(message.type == "stream_shape") {
+      console.log("in stream fe");
+      const shape = message.shape;
+      clearCanvas(existingShapes , canvas , ctx);
+      ctx.strokeStyle = "rgba(255 , 255 , 255)";
+      ctx.strokeRect(shape.x , shape.y , shape.width , shape.height);
+      console.log("out stream fe");
+    }
+
+    console.log("going1");
   }
 
   clearCanvas(existingShapes , canvas , ctx);
@@ -77,6 +90,20 @@ export async function initDraw(canvas: HTMLCanvasElement , roomId: string , sock
       clearCanvas(existingShapes , canvas , ctx);
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
       ctx?.strokeRect(startX, startY, width, height);
+
+      socket.send(
+        JSON.stringify({
+          type: "stream_shape",
+          shape: {
+            type: "rect",
+            x: startX,
+            y: startY,
+            width,
+            height
+          },
+          roomId,
+        })
+      )
     }
   });
 }

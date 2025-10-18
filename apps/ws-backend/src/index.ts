@@ -89,6 +89,26 @@ wss.on("connection", function connection(ws, request) {
       user.rooms = user?.rooms.filter((x) => x === parsedData.room);
     }
 
+    if(parsedData.type == "stream_shape") {
+      const shape = parsedData.shape;
+      const roomId = parsedData.roomId;
+
+      console.log("stream be1");
+      users.forEach((user) => {
+        if(user.rooms.includes(String(roomId))) {
+          user.ws.send(
+            JSON.stringify({
+              type: "stream_shape",
+              shape,
+              roomId
+            })
+          )
+        }
+      })
+
+      console.log("stream be2");
+    }
+
     if (parsedData.type == "chat") {
       const roomId = Number(parsedData.roomId);
       const message = parsedData.message;

@@ -14,7 +14,7 @@ type Shape = {
     radius: number
 }
 
-export async function initDraw(canvas: HTMLCanvasElement , roomId: string , socket: WebSocket) {
+export async function initDraw(canvas: HTMLCanvasElement , roomId: string , socket: WebSocket , shapeType: "rect" | "circle" | "line" | "point") {
   const ctx = canvas.getContext("2d");
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);

@@ -1,8 +1,8 @@
 import WebSocket, { WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
+import createShape from "./dbquery/createShape.js";
 import { prismaClient } from "@repo/db/client";
-import { int, unknown } from "zod";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -109,29 +109,25 @@ wss.on("connection", function connection(ws, request) {
       console.log("stream be2");
     }
 
-    if (parsedData.type == "chat") {
-      const roomId = Number(parsedData.roomId);
-      const message = parsedData.message;
-      const slug = parsedData.slug;
+    if (parsedData.type == "draw_shape") {
+      let shape = parsedData.shape;
+      const roomId = parsedData.roomId;
+      const userId =  checkUser(token);
+      console.log("shape shape =", shape);
 
       console.log("in db");
-      await prismaClient.chat.create({
-        data: {
-          // @ts-ignore
-          roomId,
-          message,
-          userId,
-        }
-      })
+      const res = await createShape(shape , roomId , Number(userId));
+      console.log("data1" , res);
 
       console.log("in brodacsting");
       users.forEach((user) => {
         if (user.rooms.includes(parsedData.roomId)) {
           user.ws.send(
             JSON.stringify({
-              type: "chat",
-              message: message,
+              type: "draw_shape",
+              shape: `${shape}`,
               roomId,
+              id: res.id
             })
           );
           console.log("brodcasted");

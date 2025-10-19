@@ -1,44 +1,37 @@
 import axios from "axios";
 import { HTTP_BACKEND } from "@/config";
 
-type Shape =
-  | {
-      type: "rect";
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    }
-  | {
-      type: "circle";
-      centerX: number;
-      centerY: number;
-      radius: number;
-    }
-  | {
-    type: "line";
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number
-    }
-  | {
-    type: "point";
-    x: number;
-    y: number;
-  };
+interface Rectangle {
+  type: "rect";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
-export async function initDraw(
-  canvas: HTMLCanvasElement,
-  roomId: string,
-  socket: WebSocket,
-  shapeType: "rect" | "circle" | "line" | "point"
-) {
+interface Circle {
+  type: "circle";
+  x: number;
+  y: number;
+  radius: number;
+}
+
+type Shape = any;
+let Shape: Shape[] = [];
+
+export async function initDraw(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket, ExistingShape: any) {
   const ctx = canvas.getContext("2d");
-
-  let existingShapes: Shape[] = await getExistingShapes(roomId);
+  console.log("Existing shape: " , ExistingShape)
   if (!ctx) {
     return;
+  }
+
+  if(Array.isArray(ExistingShape)) {
+    ExistingShape.map((item: any) => {
+      console.log("Existing shape item: " , item);
+    });
+  } else {
+    console.log("Existing shape" , ExistingShape);
   }
 
   socket.onmessage = (event) => {
@@ -57,7 +50,20 @@ export async function initDraw(
       const shape = message.shape;
       clearCanvas(existingShapes, canvas, ctx);
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
+          if (shape.type === "rect") {
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    } else if (shape.type === "circle") {
+      ctx.beginPath();
+      ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.closePath();
+    } else if (shape.type === "line") {
+      ctx.beginPath();
+      ctx.moveTo(shape.x1, shape.y1);
+      ctx.lineTo(shape.x2, shape.y2);
+      ctx.stroke();
+      ctx.closePath();
+    }
       console.log("out stream fe");
     }
 
@@ -82,13 +88,40 @@ export async function initDraw(
     console.log("mouse up trigger");
     const width = e.clientX - startX;
     const height = e.clientY - startY;
-    const shape: Shape = {
-      type: "rect",
-      x: startX,
-      y: startY,
-      height,
-      width,
-    };
+    const currentX = e.offsetX;
+    const currentY = e.offsetY;
+
+    let shape: Shape;
+
+    if(shapeType === "rect") {
+      shape = {
+        type: "rect",
+        x: startX,
+        y: startY,
+        width,
+        height
+      };
+    } else if(shapeType === "circle") {
+        const centerX = startX + width / 2;
+        const centerY = startY + height / 2;
+        const radius = Math.max(Math.abs(width), Math.abs(height)) / 2;
+        shape = {
+          type: "circle",
+          centerX,
+          centerY,
+          radius
+        };
+    } else if(shapeType === "line") {
+        shape = {
+        type: "line",
+        x1: startX,
+        y1: startY,
+        x2: currentX,
+        y2: currentY,
+      };
+    } else {
+      return;
+    }
 
     existingShapes.push(shape);
 
@@ -140,6 +173,11 @@ export async function initDraw(
           radius
         }
 
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.closePath();
+
       } else if(shapeType == "line") {
 
         shape = {
@@ -150,11 +188,14 @@ export async function initDraw(
           y2: currentY
         }
 
+        ctx.beginPath();
+        ctx.moveTo(startX , startY);
+        ctx.lineTo(currentX , currentY);
+        ctx.stroke();
+
       } else {
         return;
       }
-
-      drawShape(ctx , shape);
 
       socket.send(
           JSON.stringify({
@@ -163,36 +204,8 @@ export async function initDraw(
             roomId,
           })
       );
-
     }
   });
-}
-
-function drawShape(ctx: CanvasRenderingContext2D , shape: Shape) {
-  ctx.strokeStyle = "white";
-
-  if(shape.type === "rect") {
-    ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);
-
-  } else if(shape.type === "circle") {
-    ctx.beginPath();
-    ctx.arc(shape.centerX , shape.centerY , shape.radius , 0 , Math.PI * 2);
-    ctx.stroke();
-    ctx.closePath();
-
-  } else if(shape.type === "line") {
-    ctx.beginPath();
-    ctx.moveTo(shape.x1 , shape.y1);
-    ctx.lineTo(shape.x2 , shape.y2);
-    ctx.stroke();
-
-  } else if(shape.type === "point") {
-    ctx.beginPath();
-    ctx.arc(shape.x, shape.y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-
-  }
 }
 
 function clearCanvas(
@@ -205,9 +218,11 @@ function clearCanvas(
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   existingShapes.map((shape) => {
-    if (shape.type == "rect") {
+    if (shape.type === "rect") {
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
       ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    } else if(shape.type === "circle") {
+      ctx.beginPath();
     }
   });
 }

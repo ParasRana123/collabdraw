@@ -21,6 +21,11 @@ type Shape =
     y1: number;
     x2: number;
     y2: number
+    }
+  | {
+    type: "point";
+    x: number;
+    y: number;
   };
 
 export async function initDraw(
@@ -123,19 +128,6 @@ export async function initDraw(
 
         ctx?.strokeRect(startX, startY, width, height);
 
-        socket.send(
-          JSON.stringify({
-            type: "stream_shape",
-            shape: {
-              type: "rect",
-              x: startX,
-              y: startY,
-              width,
-              height,
-            },
-            roomId,
-          })
-        );
       } else if(shapeType == "circle") {
         const centerX = startX + width / 2;
         const centerY = startY + height / 2;
@@ -148,11 +140,6 @@ export async function initDraw(
           radius
         }
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.closePath();
-        
       } else if(shapeType == "line") {
 
         shape = {
@@ -163,13 +150,49 @@ export async function initDraw(
           y2: currentY
         }
 
-        ctx.beginPath();
-        ctx.moveTo(startX , startY);
-        ctx.lineTo(currentX , currentY);
-        ctx.stroke();
+      } else {
+        return;
       }
+
+      drawShape(ctx , shape);
+
+      socket.send(
+          JSON.stringify({
+            type: "stream_shape",
+            shape: shape,
+            roomId,
+          })
+      );
+
     }
   });
+}
+
+function drawShape(ctx: CanvasRenderingContext2D , shape: Shape) {
+  ctx.strokeStyle = "white";
+
+  if(shape.type === "rect") {
+    ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);
+
+  } else if(shape.type === "circle") {
+    ctx.beginPath();
+    ctx.arc(shape.centerX , shape.centerY , shape.radius , 0 , Math.PI * 2);
+    ctx.stroke();
+    ctx.closePath();
+
+  } else if(shape.type === "line") {
+    ctx.beginPath();
+    ctx.moveTo(shape.x1 , shape.y1);
+    ctx.lineTo(shape.x2 , shape.y2);
+    ctx.stroke();
+
+  } else if(shape.type === "point") {
+    ctx.beginPath();
+    ctx.arc(shape.x, shape.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+
+  }
 }
 
 function clearCanvas(

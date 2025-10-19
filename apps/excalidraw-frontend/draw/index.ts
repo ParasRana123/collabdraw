@@ -14,7 +14,14 @@ type Shape =
       centerX: number;
       centerY: number;
       radius: number;
-    };
+    }
+  | {
+    type: "line";
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number
+  };
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -96,6 +103,8 @@ export async function initDraw(
     const currentX = e.offsetX;
     const currentY = e.offsetY;
 
+    let shape: Shape;
+
     if (clicked) {
       const width = e.clientX - startX;
       const height = e.clientY - startY;
@@ -103,6 +112,15 @@ export async function initDraw(
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
 
       if (shapeType == "rect") {
+
+        shape = {
+          type: "rect",
+          x: startX,
+          y: startY,
+          width,
+          height
+        }
+
         ctx?.strokeRect(startX, startY, width, height);
 
         socket.send(
@@ -120,13 +138,31 @@ export async function initDraw(
         );
       } else if(shapeType == "circle") {
         const centerX = startX + width / 2;
-        const centerY = startX + height / 2;
-        const radius = Math.max(width , height) / 2;
+        const centerY = startY + height / 2;
+        const radius = Math.max(Math.abs(width) , Math.abs(height)) / 2;
+
+        shape = {
+          type: 'circle',
+          centerX,
+          centerY,
+          radius
+        }
+
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.stroke();
         ctx.closePath();
+        
       } else if(shapeType == "line") {
+
+        shape = {
+          type: "line",
+          x1: startX,
+          y1: startY,
+          x2: currentX,
+          y2: currentY
+        }
+
         ctx.beginPath();
         ctx.moveTo(startX , startY);
         ctx.lineTo(currentX , currentY);

@@ -2,33 +2,40 @@ import { initDraw } from "@/draw";
 import { useEffect , useRef, useState } from "react";
 import { IconButton } from "./IconButton";
 import { Circle, Pencil, RectangleHorizontalIcon } from "lucide-react";
+import { Game } from "@/draw/Game";
 
-type Shape = "circle" | "rect" | "line" | "point";
+export type Tool = "circle" | "rect" | "line" | "point";
 
 export function Canvas({ roomId , socket } : {roomId: string , socket: WebSocket}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [selectedShape , setSelectedShape] = useState<Shape>("circle");
+    const [game , setGame] = useState<Game>();
+    const [selectedTool , setSelectedTool] = useState<Tool>("circle");
+
+    useEffect(() => {
+        game.setTool(selectedTool);
+    } , [selectedTool , game])
 
     useEffect(() => {
         if(canvasRef.current) {
-            initDraw(canvasRef.current , roomId , socket , selectedShape);
+            const g = new Game(canvasRef.current , roomId , socket);
+            setGame(g);
         }
-    } , [ canvasRef , selectedShape ])
+    } , [ canvasRef , selectedTool ])
 
     return <div>
 
-        <button className={`px-3 py-1 ${selectedShape === "rect" ? "text-red-500" : "text-black"}`} onClick={() => {
-            setSelectedShape("rect");
+        <button className={`px-3 py-1 ${selectedTool === "rect" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedTool("rect");
 
         }}>Rectangle</button>
-        <button className={`px-3 py-1  ${selectedShape === "circle" ? "text-red-500" : "text-black"}`} onClick={() => {
-            setSelectedShape("circle");
+        <button className={`px-3 py-1  ${selectedTool === "circle" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedTool("circle");
         }}>Circle</button>
-        <button className={`px-3 py-1  ${selectedShape === "line" ? "text-red-500" : "text-black"}`} onClick={() => {
-            setSelectedShape("line");
+        <button className={`px-3 py-1  ${selectedTool === "line" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedTool("line");
         }}>Line</button>
-        <button className={`px-3 py-1  ${selectedShape === "point" ? "text-red-500" : "text-black"}`} onClick={() => {
-            setSelectedShape("point");
+        <button className={`px-3 py-1  ${selectedTool === "point" ? "text-red-500" : "text-black"}`} onClick={() => {
+            setSelectedTool("point");
         }}>Point</button>
 
         <canvas ref={canvasRef} width={2000} height={1080}></canvas>

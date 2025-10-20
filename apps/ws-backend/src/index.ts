@@ -2,6 +2,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import createShape from "./dbquery/createShape.js";
+import deleteShape from "./dbquery/deleteShape.js";
 import { prismaClient } from "@repo/db/client";
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -136,6 +137,36 @@ wss.on("connection", function connection(ws, request) {
         }
       });
       console.log("out brodacsting");
+    }
+
+    if(parsedData.type === "delete_shape") {
+      const shape = JSON.parse(parsedData.shape);
+      console.log("shape: " , shape);
+      const room_id = parsedData.roomId;
+      const user = users.find((x) => x.ws === ws)
+      if(!user?.rooms.includes(room_id)) {
+        console.log("user not in room");
+        return;
+      }
+      const shapeToDelete = await prismaClient.shape.findFirst({
+        where: {
+          id: shape.id
+        }
+      });
+      console.log("shape to delete: " , shapeToDelete);
+      if(shapeToDelete) {
+        const res = await deleteShape(shapeToDelete.id);
+        console.log("delete res = " , res);
+      }
+      users.forEach((user) => {
+        if(user.rooms.includes(room_id)) {
+          user.ws.send(JSON.stringify({
+            type: "delete_shape",
+            id: shape.id,
+            room_id: room_id
+          }))
+        }
+      })
     }
   });
 });

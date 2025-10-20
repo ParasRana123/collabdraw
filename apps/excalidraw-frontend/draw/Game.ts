@@ -8,8 +8,8 @@ export class Game {
     private roomId: string;
     private socket: WebSocket;
     private clicked: boolean;
-    private startX = 0;
-    private startY = 0;
+    private startX: number = 0;
+    private startY: number = 0;
     private selectedTool: Tool = "circle"; 
 
     constructor(canvas: HTMLCanvasElement , roomId: string , socket: WebSocket) {

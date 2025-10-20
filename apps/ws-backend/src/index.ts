@@ -1,9 +1,9 @@
 import WebSocket, { WebSocketServer } from "ws";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET } from "@repo/backend-common/config";
 import createShape from "./dbquery/createShape.js";
 import deleteShape from "./dbquery/deleteShape.js";
 import { prismaClient } from "@repo/db/client";
+import findUser from "./utils/findUser.js";
+import verifyToken from "./utils/verfifyToken.js";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -30,25 +30,6 @@ interface User {
 
 const users: User[] = [];
 
-function checkUser(token: string): string | null {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    if (typeof decoded == "string") {
-      return null;
-    }
-
-    if (!decoded || !decoded.userId) {
-      return null;
-    }
-
-    return decoded.userId;
-  } catch (e) {
-    console.error("JWT verification failed:", e);
-    return null;
-  }
-}
-
 wss.on("connection", function connection(ws, request) {
   const url = request.url;
   if (!url) {
@@ -56,7 +37,7 @@ wss.on("connection", function connection(ws, request) {
   }
   const queryParams = new URLSearchParams(url.split("?")[1]);
   const token = queryParams.get("token") || "";
-  const userId = checkUser(token);
+  const userId = verifyToken(token);
 
   if (userId == null) {
     ws.close();
@@ -78,12 +59,12 @@ wss.on("connection", function connection(ws, request) {
     const parsedData = JSON.parse(data as unknown as string);
 
     if (parsedData.type == "join_room") {
-      const user = users.find((x) => x.ws === ws);
+      const user = findUser(users , ws);
       user?.rooms.push(parsedData.roomId);
     }
 
     if (parsedData.type == "leave_room") {
-      const user = users.find((x) => x.ws === ws);
+      const user = findUser(users , ws);
       if (!user) {
         return;
       }
@@ -113,7 +94,7 @@ wss.on("connection", function connection(ws, request) {
     if (parsedData.type == "draw_shape") {
       let shape = parsedData.shape;
       const roomId = parsedData.roomId;
-      const userId =  checkUser(token);
+      const userId =  verifyToken(token);
       console.log("shape shape =", shape);
 
       console.log("in db");
@@ -143,7 +124,7 @@ wss.on("connection", function connection(ws, request) {
       const shape = JSON.parse(parsedData.shape);
       console.log("shape: " , shape);
       const room_id = parsedData.roomId;
-      const user = users.find((x) => x.ws === ws)
+      const user = findUser(users , ws);
       if(!user?.rooms.includes(room_id)) {
         console.log("user not in room");
         return;

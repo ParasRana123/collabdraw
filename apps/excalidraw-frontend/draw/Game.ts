@@ -14,7 +14,7 @@ export class Game {
     private width: number = 0;
     private height: number = 0;
     private radius: number = 5;
-    private selectedTool: Tool = "circle"; 
+    private selectedShapes: any[] = [];
 
     constructor(canvas: HTMLCanvasElement, S_shape: string, roomId: string , socket: WebSocket) {
         this.canvas = canvas;
@@ -22,7 +22,6 @@ export class Game {
         this.roomId = roomId;
         this.socket = socket;
         this.S_shape = S_shape;
-        this.existingShapes = [];
         this.clicked = false;
         this.init();
         this.initHandlers();
@@ -36,8 +35,18 @@ export class Game {
         this.drawShape();
     }
 
-    setShape(tool: "circle" | "pencil" | "rect") {
-        this.selectedTool = tool;
+    setShape(shape: string) {
+        console.log("Setting shape", shape);
+        this.S_shape = shape;
+        if (this.selectedShapes.length > 0) {
+            console.log("Selected shapes length", this.selectedShapes.length);
+            this.selectedShapes.forEach((item) => {
+                this.Shape[item.index].color = item.prevColor;
+                console.log("Shape after setting color", this.Shape[item.index]);
+            });
+            this.selectedShapes = [];
+            this.drawShape();
+        }
     }
 
     init() {

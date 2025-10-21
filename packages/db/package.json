@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "exports" : {
-    "./client" : "./dist/index.js"
+      "./client" : "./dist/index.js"
   },
   "type": "module",
   "scripts": {

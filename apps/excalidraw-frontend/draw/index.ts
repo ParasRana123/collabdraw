@@ -101,16 +101,12 @@ export async function initDraw(canvas: HTMLCanvasElement, shape: string , roomId
   }
 }
 
-function clearCanvas(
-  existingShapes: Shape[],
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D
-) {
+export default function clearCanvas(Shape: Shape[], canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "rgba(0 , 0 , 0)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  existingShapes.map((shape) => {
+  Shape.map((shape) => {
     if (shape.type === "rect") {
       ctx.strokeStyle = "rgba(255 , 255 , 255)";
       ctx?.strokeRect(shape.x, shape.y, shape.width, shape.height);

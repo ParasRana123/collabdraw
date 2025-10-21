@@ -4,7 +4,7 @@ import { IconButton } from "./IconButton";
 import { Circle, Pencil, RectangleHorizontalIcon } from "lucide-react";
 import { Game } from "@/draw/Game";
 
-export type Tool = "circle" | "rect" | "line" | "point";
+export type Tool = "circle" | "rect" | "pencil" | "point";
 
 export function Canvas({ roomId , socket } : {roomId: string , socket: WebSocket}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);

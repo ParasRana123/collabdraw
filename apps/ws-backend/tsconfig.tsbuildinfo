@@ -1,1 +1,1 @@
-{"root":["./src/index.ts"],"version":"5.9.2"}
+{"root":["./src/index.ts","./src/dbquery/createshape.ts","./src/dbquery/deleteshape.ts","./src/utils/finduser.ts","./src/utils/verfifytoken.ts"],"version":"5.9.2"}

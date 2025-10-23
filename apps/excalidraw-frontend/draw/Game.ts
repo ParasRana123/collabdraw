@@ -89,9 +89,8 @@ export class Game {
             } else if(this.S_shape === "circle") {
                 this.ctx.strokeStyle = "white";
                 this.ctx.beginPath();
-                this.ctx.arc(this.startX , this.startY , this.radius , 0 , 2 * Math.PI);
+                this.ctx.arc(this.startX , this.startY , Math.sqrt(this.width * this.width + this.height * this.height) , 0 , 2 * Math.PI);
                 this.ctx.stroke();
-                this.ctx.closePath();
             }
         }
     }
@@ -133,10 +132,10 @@ export class Game {
         this.ctx.fillRect(0 , 0 , this.canvas.width , this.canvas.height);
         this.Shape.map((item) => {
             if(item.type === "rect") {
-                this.ctx.strokeStyle = "black";
+                this.ctx.strokeStyle = "white";
                 this.ctx.strokeRect(item.x , item.y , item.width , item.height);
             } else if(item.type === "circle") {
-                this.ctx.strokeStyle = "black";
+                this.ctx.strokeStyle = "white";
                 this.ctx.beginPath();
                 this.ctx.arc(item.x , item.y , item.radius , 0 , 2 * Math.PI);
                 this.ctx.stroke();

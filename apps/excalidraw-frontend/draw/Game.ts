@@ -14,6 +14,7 @@ export class Game {
     private width: number = 0;
     private height: number = 0;
     private radius: number = 5;
+    private headlen: number = 10;
     private selectedShapes: any[] = [];
 
     constructor(canvas: HTMLCanvasElement, S_shape: string, roomId: string , socket: WebSocket) {
@@ -98,6 +99,17 @@ export class Game {
                 this.ctx.moveTo(this.startX , this.startY);
                 this.ctx.lineTo(e.clientX , e.clientY);
                 this.ctx.stroke();
+            } else if(this.S_shape === "arrow") {
+                const dx = e.clientX - this.startX;
+                const dy = e.clientY - this.startY;
+                const angle = Math.atan2(dy , dx);
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.startX , this.startY);
+                this.ctx.lineTo(e.clientX , e.clientY);
+                this.ctx.lineTo(e.clientX - this.headlen * Math.cos(angle - Math.PI / 6) , e.clientY - this.headlen * Math.sin(angle - Math.PI / 6))
+                this.ctx.moveTo(e.clientX , e.clientY);
+                this.ctx.lineTo(e.clientX - this.headlen * Math.cos(angle + Math.PI / 6) , e.clientY - this.headlen * Math.sin(angle + Math.PI / 6))
+                this.ctx.stroke();
             }
         }
     }
@@ -140,6 +152,19 @@ export class Game {
                 type: "line"
             })
         }))
+      } else if(this.S_shape === "arrow") {
+        this.socket.send(JSON.stringify({
+            type: "draw_shape",
+            roomId: this.roomId,
+            shape: JSON.stringify({
+                x: this.startX,
+                y: this.startY,
+                x1: e.clientX,
+                y1: e.clientY,
+                headlen: this.headlen,
+                type: "arrow"
+            })
+        }))
       }
       this.drawShape();
     }
@@ -164,6 +189,18 @@ export class Game {
                 this.ctx.beginPath();
                 this.ctx.moveTo(item.x , item.y);
                 this.ctx.lineTo(item.x1 , item.y1);
+                this.ctx.stroke();
+            } else if(item.type === "arrow") {
+                const dx = item.x1 - item.x;
+                const dy = item.y1 - item.y;
+                const angle = Math.atan2(dy , dx);
+                this.ctx.strokeStyle = "white";
+                this.ctx.beginPath();
+                this.ctx.moveTo(item.x , item.y);
+                this.ctx.lineTo(item.x1 , item.y1);
+                this.ctx.lineTo(item.x1 - item.headlen * Math.cos(angle - Math.PI / 6) , item.y1 - item.headlen * Math.sin(angle - Math.PI / 6))
+                this.ctx.moveTo(item.x1 , item.y1);
+                this.ctx.lineTo(item.x1 - item.headlen * Math.cos(angle + Math.PI / 6) , item.y1 - item.headlen * Math.sin(angle + Math.PI / 6))
                 this.ctx.stroke();
             }
         })

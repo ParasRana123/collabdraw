@@ -110,24 +110,25 @@ app.post("/room", middlware, async (req, res) => {
 });
 
 app.get("/chat/:roomId", async (req, res) => {
-  try {
-    const roomId = Number(req.params.roomId);
-    const messages = await prismaClient.chat.findMany({
-      where: {
-        roomId: roomId,
-      },
-      orderBy: {
-        id: "desc",
-      },
-      take: 50,
+  console.log("Inside chat endpoint");
+    const { roomId } = req.params;
+    if (!roomId) {
+        res.status(400).json({ message: "Room ID is required" });
+        return;
+    }
+    const shapes = await prismaClient.shape.findMany({
+        where: {
+            roomId: parseInt(roomId)
+        },
+        include: {
+            user: true,
+        },
+        orderBy: {
+            id: "desc"
+        },
+        take:10000
     });
-
-    res.json({
-      messages,
-    });
-  } catch (error) {
-    console.log("error fetching the chats: " , error);
-  }
+    res.status(200).json({ shapes });
 });
 
 app.get("/room/:slug", async (req, res) => {
@@ -143,4 +144,4 @@ app.get("/room/:slug", async (req, res) => {
   });
 });
 
-app.listen(3001);
+app.listen(3002);

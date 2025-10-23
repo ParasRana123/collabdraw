@@ -38,6 +38,7 @@ wss.on("connection", function connection(ws, request) {
   const queryParams = new URLSearchParams(url.split("?")[1]);
   const token = queryParams.get("token") || "";
   const userId = verifyToken(token);
+  console.log("Verified userId: " , userId);
 
   if (userId == null) {
     ws.close();

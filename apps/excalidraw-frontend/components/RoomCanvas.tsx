@@ -48,5 +48,6 @@ export function RoomCanvas({ roomId } : {roomId: string}) {
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
         }} onClick={() => { (shape !== "circle")? setShape("circle") : setShape("null")}}>Circle</button>
+        <Canvas roomId={roomId} socket={socket} S_shape={shape} />
     </div>
 }

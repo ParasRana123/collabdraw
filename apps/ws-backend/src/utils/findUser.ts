@@ -1,11 +1,11 @@
-import { WebSocket } from "ws";
+import { WebSocket } from 'ws';
 
 interface User {
-  ws: WebSocket;
-  rooms: string[];
-  userId: string;
+    ws: WebSocket;
+    userId: number;
+    room_id: string[];
 }
 
-export default function findUser(users: User[] , ws: WebSocket) : User | undefined {
-    return users.find((x) => x.ws === ws);
+export default function findUser(users: User[], ws: WebSocket): User | undefined {
+    return users.find((user) => user.ws === ws);
 }

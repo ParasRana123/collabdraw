@@ -24,8 +24,8 @@ const wss = new WebSocketServer({ port: 8080 });
 
 interface User {
   ws: WebSocket;
-  rooms: string[];
-  userId: string;
+  room_id: string[];
+  userId: number;
 }
 
 const users: User[] = [];
@@ -46,9 +46,9 @@ wss.on("connection", function connection(ws, request) {
   }
 
   users.push({
-    userId,
-    rooms: [],
-    ws,
+    ws: ws,
+    userId: parseInt(userId),
+    room_id: []
   });
 
   // {
@@ -58,18 +58,17 @@ wss.on("connection", function connection(ws, request) {
 
   ws.on("message", async function message(data) {
     const parsedData = JSON.parse(data as unknown as string);
+    const user = findUser(users , ws);
 
     if (parsedData.type == "join_room") {
-      const user = findUser(users , ws);
-      user?.rooms.push(parsedData.roomId);
+      user?.room_id.push(parsedData.roomId);
     }
 
     if (parsedData.type == "leave_room") {
-      const user = findUser(users , ws);
       if (!user) {
         return;
       }
-      user.rooms = user?.rooms.filter((x) => x === parsedData.room);
+      user.room_id = user?.room_id.filter((x) => x === parsedData.room);
     }
 
     if(parsedData.type == "stream_shape") {
@@ -78,7 +77,7 @@ wss.on("connection", function connection(ws, request) {
 
       console.log("stream be1");
       users.forEach((user) => {
-        if(user.rooms.includes(String(roomId))) {
+        if(user.room_id.includes(String(roomId))) {
           user.ws.send(
             JSON.stringify({
               type: "stream_shape",
@@ -95,16 +94,21 @@ wss.on("connection", function connection(ws, request) {
     if (parsedData.type == "draw_shape") {
       let shape = parsedData.shape;
       const roomId = parsedData.roomId;
-      const userId =  verifyToken(token);
+      console.log("User id is: " , user?.userId);
       console.log("shape shape =", shape);
 
+      if(!user?.userId) {
+        console.log("user id is null");
+        return null;
+      }
+
       console.log("in db");
-      const res = await createShape(shape , roomId , Number(userId));
+      const res = await createShape(shape , roomId , user?.userId);
       console.log("data1" , res);
 
       console.log("in brodacsting");
       users.forEach((user) => {
-        if (user.rooms.includes(parsedData.roomId)) {
+        if (user.room_id.includes(parsedData.roomId)) {
           user.ws.send(
             JSON.stringify({
               type: "draw_shape",
@@ -126,7 +130,7 @@ wss.on("connection", function connection(ws, request) {
       console.log("shape: " , shape);
       const room_id = parsedData.roomId;
       const user = findUser(users , ws);
-      if(!user?.rooms.includes(room_id)) {
+      if(!user?.room_id.includes(room_id)) {
         console.log("user not in room");
         return;
       }
@@ -141,7 +145,7 @@ wss.on("connection", function connection(ws, request) {
         console.log("delete res = " , res);
       }
       users.forEach((user) => {
-        if(user.rooms.includes(room_id)) {
+        if(user.room_id.includes(room_id)) {
           user.ws.send(JSON.stringify({
             type: "delete_shape",
             id: shape.id,

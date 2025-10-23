@@ -87,6 +87,7 @@ export class Game {
                 this.ctx.strokeStyle = "white";
                 this.ctx.strokeRect(this.startX , this.startY , this.width , this.height);
             } else if(this.S_shape === "circle") {
+                this.ctx.strokeStyle = "white";
                 this.ctx.beginPath();
                 this.ctx.arc(this.startX , this.startY , this.radius , 0 , 2 * Math.PI);
                 this.ctx.stroke();

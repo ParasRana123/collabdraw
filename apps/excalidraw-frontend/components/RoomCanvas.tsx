@@ -10,7 +10,7 @@ export function RoomCanvas({ roomId } : {roomId: string}) {
     const [shape , setShape] = useState("null");
 
     useEffect(() => {
-        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc2MTIxNTgwM30.azEFGyBWg5d8yyTOn_ruGVizudSpSVBW2v1y7HjAhR0`);
+        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc2MTI0MDQ2MH0.BHUJ_Wj9y9ewhiG9_gnfQGJ4pEHzAxDXenTCzWNW6nQ`);
         
         ws.onopen = () => {
             setSocket(ws);
@@ -48,6 +48,16 @@ export function RoomCanvas({ roomId } : {roomId: string}) {
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
         }} onClick={() => { (shape !== "circle")? setShape("circle") : setShape("null")}}>Circle</button>
+                <button style={{
+                padding: '8px 16px',
+                margin: '0 5px',
+                border: 'none',
+                borderRadius: '20px',
+                backgroundColor: shape === "line" ? '#4CAF50' : '#555',
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
+        }} onClick={() => { (shape !== "line")? setShape("line") : setShape("null")}}>Line</button>
         <Canvas roomId={roomId} socket={socket} S_shape={shape} />
     </div>
 }

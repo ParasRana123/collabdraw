@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import getExistingShapes from "./existingShapes";
 
 export class Game {
@@ -91,6 +92,12 @@ export class Game {
                 this.ctx.beginPath();
                 this.ctx.arc(this.startX , this.startY , Math.sqrt(this.width * this.width + this.height * this.height) , 0 , 2 * Math.PI);
                 this.ctx.stroke();
+            } else if(this.S_shape === "line") {
+                this.ctx.strokeStyle = "white";
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.startX , this.startY);
+                this.ctx.lineTo(e.clientX , e.clientY);
+                this.ctx.stroke();
             }
         }
     }
@@ -121,6 +128,18 @@ export class Game {
             type: "circle"
           })
         }))
+      } else if(this.S_shape === "line") {
+        this.socket.send(JSON.stringify({
+            type: "draw_shape",
+            roomId: this.roomId,
+            shape: JSON.stringify({
+                x: this.startX,
+                y: this.startY,
+                x1: e.clientX,
+                y1: e.clientY,
+                type: "line"
+            })
+        }))
       }
       this.drawShape();
     }
@@ -140,6 +159,12 @@ export class Game {
                 this.ctx.arc(item.x , item.y , item.radius , 0 , 2 * Math.PI);
                 this.ctx.stroke();
                 this.ctx.closePath();
+            } else if(item.type === "line") {
+                this.ctx.strokeStyle = "white";
+                this.ctx.beginPath();
+                this.ctx.moveTo(item.x , item.y);
+                this.ctx.lineTo(item.x1 , item.y1);
+                this.ctx.stroke();
             }
         })
     }

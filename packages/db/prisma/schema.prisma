@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id         String       @id  @default(uuid())
+  id         Int          @id  @default(autoincrement())
   email      String       @unique
   password   String 
   photo      String?
@@ -21,7 +21,7 @@ model Room {
   id          Int         @id @default(autoincrement())
   slug        String      @unique
   createdAt   DateTime    @default(now())
-  adminId     String
+  adminId     Int
   admin       User        @relation(fields: [adminId] , references: [id])
   chats       Shape[]
 }
@@ -30,7 +30,7 @@ model Shape {
   id        Int        @id @default(autoincrement())
   roomId    Int
   shape     String
-  userId    String 
+  userId    Int 
   room      Room        @relation(fields: [roomId] , references: [id])
   user      User        @relation(fields: [userId] , references: [id]) 
 }

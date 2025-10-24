@@ -14,6 +14,8 @@ export class Game {
     private height: number = 0;
     private radius: number = 5;
     private headlen: number = 10;
+    private prevX: number = 0;
+    private prevY: number = 0;
     private selectedShapes: any[] = [];
 
     constructor(canvas: HTMLCanvasElement, S_shape: string, roomId: string , socket: WebSocket) {
@@ -125,6 +127,26 @@ export class Game {
             } else if(this.S_shape === "oval") {
                 this.ctx.strokeStyle = "white";
                 this.drawEllipse(this.startX , this.startY , this.width / 2 , this.height / 2);
+            } else if(this.S_shape === "doodle") {
+                this.ctx.lineCap = "round";
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.prevX , this.prevY);
+                this.ctx.lineTo(e.clientX , e.clientY);
+                this.ctx.stroke();
+                this.Shape.push({ x: this.prevX , y: this.prevY , x2: e.clientX , y2: e.clientY , type: "line" });
+                this.socket.send(JSON.stringify({
+                    type: "draw_shape",
+                    roomId: this.roomId,
+                    shape: JSON.stringify({
+                        x: this.prevX,
+                        y: this.prevY,
+                        x2: e.clientX,
+                        y2: e.clientY,
+                        type: "line"
+                    })
+                }))
+                this.prevX = e.clientX;
+                this.prevY = e.clientY;
             }
         }
     }
@@ -206,6 +228,9 @@ export class Game {
                 type: "text"
             })
         }))
+      } else if(this.S_shape === "doodle") {
+        this.ctx.stroke();
+        this.ctx.beginPath();
       }
       this.drawShape();
     }

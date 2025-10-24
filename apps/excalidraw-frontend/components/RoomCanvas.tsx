@@ -88,6 +88,16 @@ export function RoomCanvas({ roomId } : {roomId: string}) {
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
         }} onClick={() => { (shape !== "text")? setShape("text") : setShape("null")}}>Text</button>
+        <button style={{
+                padding: '8px 16px',
+                margin: '0 5px',
+                border: 'none',
+                borderRadius: '20px',
+                backgroundColor: shape === "doodle" ? '#4CAF50' : '#555',
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
+        }} onClick={() => { (shape !== "doodle")? setShape("doodle") : setShape("null")}}>Doodle</button>
         <Canvas roomId={roomId} socket={socket} S_shape={shape} />
     </div>
 }

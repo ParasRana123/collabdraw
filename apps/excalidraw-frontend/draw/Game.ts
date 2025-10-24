@@ -1,4 +1,3 @@
-import { X } from "lucide-react";
 import getExistingShapes from "./existingShapes";
 
 export class Game {
@@ -37,6 +36,19 @@ export class Game {
         const shapes = await getExistingShapes(this.roomId);
         this.Shape = shapes;
         this.drawShape();
+    }
+
+    drawEllipse(x: number , y: number , radiusX: number , radiusY: number) {
+            radiusX = Math.abs(radiusX);
+            radiusY = Math.abs(radiusY);
+            
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.translate(x, y);
+            this.ctx.scale(radiusX / radiusY, 1); 
+            this.ctx.arc(0, 0, radiusY, 0, 2 * Math.PI);
+            this.ctx.restore();
+            this.ctx.stroke(); 
     }
 
     setShape(shape: string) {
@@ -110,6 +122,9 @@ export class Game {
                 this.ctx.moveTo(e.clientX , e.clientY);
                 this.ctx.lineTo(e.clientX - this.headlen * Math.cos(angle + Math.PI / 6) , e.clientY - this.headlen * Math.sin(angle + Math.PI / 6))
                 this.ctx.stroke();
+            } else if(this.S_shape === "oval") {
+                this.ctx.strokeStyle = "white";
+                this.drawEllipse(this.startX , this.startY , this.width / 2 , this.height / 2);
             }
         }
     }
@@ -165,6 +180,18 @@ export class Game {
                 type: "arrow"
             })
         }))
+      } else if(this.S_shape === "oval") {
+        this.socket.send(JSON.stringify({
+            type: "draw_shape",
+            roomId: this.roomId,
+            shape: JSON.stringify({
+                x: this.startX,
+                y: this.startY,
+                width: this.width,
+                height: this.height,
+                type: "oval"
+            })
+        }))
       }
       this.drawShape();
     }
@@ -202,6 +229,9 @@ export class Game {
                 this.ctx.moveTo(item.x1 , item.y1);
                 this.ctx.lineTo(item.x1 - item.headlen * Math.cos(angle + Math.PI / 6) , item.y1 - item.headlen * Math.sin(angle + Math.PI / 6))
                 this.ctx.stroke();
+            } else if(this.S_shape === "oval") {
+                this.ctx.strokeStyle ="white",
+                this.drawEllipse(item.x , item.y , item.width / 2 , item.height / 2);
             }
         })
     }

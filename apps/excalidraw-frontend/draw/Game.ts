@@ -192,6 +192,20 @@ export class Game {
                 type: "oval"
             })
         }))
+      } else if(this.S_shape === "text") {
+        const text = prompt("Enter text: ");
+        this.socket.send(JSON.stringify({
+            type: "draw_shape",
+            roomId: this.roomId,
+            shape: JSON.stringify({
+                x: e.clientX,
+                y: e.clientY,
+                text,
+                fontSize: 20,
+                color: "white",
+                type: "text"
+            })
+        }))
       }
       this.drawShape();
     }
@@ -232,6 +246,11 @@ export class Game {
             } else if(this.S_shape === "oval") {
                 this.ctx.strokeStyle ="white",
                 this.drawEllipse(item.x , item.y , item.width / 2 , item.height / 2);
+            } else if(this.S_shape === "text") {
+                this.ctx.fillStyle = item.color || "white";
+                 this.ctx.font = `${item.fontSize || 20}px Arial`;
+                 this.ctx.textBaseline = "top",
+                 this.ctx.fillText(item.text , item.x , item.y);
             }
         })
     }

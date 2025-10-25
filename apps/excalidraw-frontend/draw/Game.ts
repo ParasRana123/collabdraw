@@ -17,6 +17,7 @@ export class Game {
     private prevX: number = 0;
     private prevY: number = 0;
     private selectedShapes: any[] = [];
+    private selectedShapeIndex: number | null = null;
 
     constructor(canvas: HTMLCanvasElement, S_shape: string, roomId: string , socket: WebSocket) {
         this.canvas = canvas;
@@ -101,6 +102,7 @@ export class Game {
         this.canvas.addEventListener("mousedown" , this.handleMouseDown);
         this.canvas.addEventListener("mousemove" , this.handleMouseMove);
         this.canvas.addEventListener("mouseup" , this.handleMouseUp);
+        this.canvas.addEventListener("click" , this.handleShapeClick);
     }
 
     handleMouseDown = (e: MouseEvent) => {
@@ -252,6 +254,47 @@ export class Game {
       this.drawShape();
     }
 
+    handleShapeClick = (e: MouseEvent) => {
+        const x = e.clientX;
+        const y = e.clientY;
+
+        let foundIndex: number | null = null;
+        for(let i = this.Shape.length - 1 ; i >= 0 ; i--) {
+            const shape = this.Shape[i];
+            if(shape.type === "rect") {
+                if(x >= shape.x && x < shape.x + shape.width && y >= shape.y && y <= shape.y + shape.height) {
+                    foundIndex = i;
+                    break;
+                }
+            } else if(shape.type === "circle") {
+                const dx = x - shape.x;
+                const dy = x - shape.y;
+                if(Math.sqrt(dx * dx + dy * dy) <= shape.radius) {
+                    foundIndex = i;
+                    break;
+                // } else if(shape.type === "line" || shape.type === "arrow") {
+                //     const dist = this.pointToLineDistance(x, y, shape.x, shape.y, shape.x1, shape.y1);
+                //     if(dist < 5) {
+                //         foundIndex = i;
+                //         break;
+                //     }
+                } else if(shape.type === "oval") {
+                        const dx = x - shape.x;
+                        const dy = y - shape.y;
+                        const rx = Math.abs(shape.width / 2);
+                        const ry = Math.abs(shape.height / 2);
+                        if((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
+                            foundIndex = i;
+                            break;
+                        }
+                }
+            }
+        }
+
+        this.selectedShapeIndex = foundIndex;
+        this.drawShape()
+    }
+
     drawShape() {
         console.log("draw shape");
         this.ctx.clearRect(0 , 0 , this.canvas.width , this.canvas.height);
@@ -295,5 +338,21 @@ export class Game {
                  this.ctx.fillText(item.text , item.x , item.y);
             }
         })
+
+        if(this.selectedShapeIndex != null) {
+            const shape = this.Shape[this.selectedShapeIndex];
+            this.ctx.strokeStyle = "blue";
+            this.ctx.lineWidth = 2;
+
+            if(shape.type === "rect") {
+                this.ctx.strokeRect(shape.x - 2, shape.y - 2, shape.width + 4, shape.height + 4);
+            } else if(shape.type === "circle") {
+                this.ctx.beginPath();
+                this.ctx.arc(shape.x, shape.y, shape.radius + 2, 0, 2 * Math.PI);
+                this.ctx.stroke();
+            } else if(shape.type === "oval") {
+                this.drawEllipse(shape.x, shape.y, shape.width / 2 + 2, shape.height / 2 + 2);
+            }
+        }
     }
 }

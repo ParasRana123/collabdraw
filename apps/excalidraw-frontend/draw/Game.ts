@@ -30,8 +30,16 @@ export class Game {
             this.init();
             this.initHandlers();
         }
+
+        const deleteBtn = document.getElementById("delete-btn");
+        if(deleteBtn) {
+            deleteBtn.addEventListener("click" , this.handleDeleteShape);
+        }
     }
 
+    handleDeleteShape = () => {
+        console.log("Delete shape function...");
+    }
 
     async fetchShapes() {
         console.log("Fetching shapes: ");
@@ -75,6 +83,15 @@ export class Game {
                 let shape = JSON.parse(data.shape);
                 shape.id = data.id;
                 this.Shape.push(shape);
+                this.drawShape();
+            } else if(data.type === "delete_shape") {
+                this.Shape = this.Shape.filter((item) => {
+                    if(item.id === data.id) {
+                        console.log("Deleting shape: " , item);
+                        return false;
+                    }
+                    return true;
+                });
                 this.drawShape();
             }
         }

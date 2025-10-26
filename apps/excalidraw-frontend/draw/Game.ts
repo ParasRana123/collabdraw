@@ -255,17 +255,36 @@ export class Game {
     }
 
     handleShapeClick = (e: MouseEvent) => {
-        const x = e.clientX;
-        const y = e.clientY;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
         let foundIndex: number | null = null;
+        const edgeThreshold = 10;
         for(let i = this.Shape.length - 1 ; i >= 0 ; i--) {
             const shape = this.Shape[i];
             if(shape.type === "rect") {
-                if(x >= shape.x && x < shape.x + shape.width && y >= shape.y && y <= shape.y + shape.height) {
+                // if(x >= shape.x && x < shape.x + shape.width && y >= shape.y && y <= shape.y + shape.height) {
+                //     foundIndex = i;
+                //     break;
+                // }
+                const left = Math.min(shape.x , shape.x + shape.width);
+                const right = Math.max(shape.x , shape.x + shape.width);
+                const top = Math.min(shape.y , shape.y + shape.height);
+                const bottom = Math.max(shape.y , shape.y + shape.height);
+
+                const nearLeft = Math.abs(x - left) <= edgeThreshold && y >= top && y <= bottom;
+                const nearRight = Math.abs(x - right) <= edgeThreshold && y >= top && y <= bottom;
+                const nearTop = Math.abs(y - top) <= edgeThreshold && x >= left && x <= right;
+                const nearBottom = Math.abs(y - bottom) <= edgeThreshold && x >= left && x <= right;
+
+                if(nearLeft || nearRight || nearTop || nearBottom) {
+                    if (nearTop) console.log("Top edge clicked");
+                    if (nearBottom) console.log("Bottom edge clicked");
                     foundIndex = i;
                     break;
                 }
+
             } else if(shape.type === "circle") {
                 const dx = x - shape.x;
                 const dy = x - shape.y;

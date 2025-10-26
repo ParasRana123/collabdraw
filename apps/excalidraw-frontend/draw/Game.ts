@@ -278,15 +278,15 @@ export class Game {
                 //         foundIndex = i;
                 //         break;
                 //     }
-                } else if(shape.type === "oval") {
-                        const dx = x - shape.x;
-                        const dy = y - shape.y;
-                        const rx = Math.abs(shape.width / 2);
-                        const ry = Math.abs(shape.height / 2);
-                        if((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
-                            foundIndex = i;
-                            break;
-                        }
+                }
+            } else if(shape.type === "oval") {
+                const dx =  x - shape.x;
+                const dy = y - shape.y;
+                const rx = Math.abs(shape.width / 2);
+                const ry = Math.abs(shape.height / 2);
+                if((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
+                    foundIndex = i;
+                    break;
                 }
             }
         }
@@ -328,10 +328,10 @@ export class Game {
                 this.ctx.moveTo(item.x1 , item.y1);
                 this.ctx.lineTo(item.x1 - item.headlen * Math.cos(angle + Math.PI / 6) , item.y1 - item.headlen * Math.sin(angle + Math.PI / 6))
                 this.ctx.stroke();
-            } else if(this.S_shape === "oval") {
+            } else if(item.type === "oval") {
                 this.ctx.strokeStyle ="white",
                 this.drawEllipse(item.x , item.y , item.width / 2 , item.height / 2);
-            } else if(this.S_shape === "text") {
+            } else if(item.type === "text") {
                 this.ctx.fillStyle = item.color || "white";
                  this.ctx.font = `${item.fontSize || 20}px Arial`;
                  this.ctx.textBaseline = "top",

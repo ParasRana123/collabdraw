@@ -360,6 +360,41 @@ export class Game {
                     foundIndex = i;
                     break;
                 }
+            } else if(shape.type === "rhombus") {
+                const { x1 , y1 , x2 , y2 } = shape;
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                const vertices = [
+                    {x: midX , y: y1},
+                    { x: x2, y: midY },
+                    { x: midX, y: y2 },
+                    { x: x1, y: midY }
+                ];
+
+                const edgeThreshold = 5;
+                for(let j = 0 ; j < vertices.length ; j++) {
+                    const p1 = vertices[j];
+                    const p2 = vertices[(j + 1) % vertices.length];
+                    const dist = this.pointToLineDistance(x, y, p1.x, p1.y, p2.x, p2.y);
+                    if(dist < edgeThreshold) {
+                        console.log("rhombus is clicked");
+                        foundIndex = i;
+                        break;
+                    }
+                }
+            } else if(shape.type === "text") {
+                this.ctx.font = `${shape.fontSize || 20}px Arial`;
+                const textWidth = this.ctx.measureText(shape.text).width;
+                const textHeight = shape.fontSize || 20;
+                const left = shape.x;
+                const right = shape.x + textWidth;
+                const top = shape.y;
+                const bottom = shape.y + textHeight;
+                if(x >= left && x <= right && y >= top && y <= bottom) {
+                    console.log("text clicked");
+                    foundIndex = i;
+                    break;
+                }
             }
         }
 
@@ -502,6 +537,16 @@ export class Game {
                 this.ctx.arc(shape.x, shape.y, 4, 0, 2 * Math.PI);
                 this.ctx.arc(shape.x1, shape.y1, 4, 0, 2 * Math.PI);
                 this.ctx.fill();
+            } else if(shape.type === "rhombus") {
+                this.ctx.strokeStyle = "blue";
+                this.drawDiamond(shape.x1 , shape.x2 , shape.y1 , shape.y2);
+                this.ctx.stroke();
+            } else if(shape.type === "text") {
+                this.ctx.font = `${shape.fontSize || 20}px Arial`;
+                const textWidth = this.ctx.measureText(shape.text).width;
+                const textHeight = shape.fontSize || 20;
+                this.ctx.strokeStyle = "blue";
+                this.ctx.strokeRect(shape.x - 2, shape.y - 2, textWidth + 4, textHeight + 4);
             }
         }
     }

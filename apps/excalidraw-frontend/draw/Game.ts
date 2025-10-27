@@ -429,6 +429,28 @@ export class Game {
                 this.ctx.arc(shape.x , shape.y , 4 , 0 , 2 * Math.PI);
                 this.ctx.arc(shape.x1 , shape.y1 , 4 , 0 , 2 * Math.PI);
                 this.ctx.fill();
+            } else if(shape.type === "arrow") {
+                const dx = shape.x1 - shape.x;
+                const dy = shape.y1 - shape.y;
+                const angle = Math.atan2(dy, dx);
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.x, shape.y);
+                this.ctx.lineTo(shape.x1, shape.y1);
+                this.ctx.lineTo(
+                    shape.x1 - shape.headlen * Math.cos(angle - Math.PI / 6),
+                    shape.y1 - shape.headlen * Math.sin(angle - Math.PI / 6)
+                );
+                this.ctx.moveTo(shape.x1, shape.y1);
+                this.ctx.lineTo(
+                    shape.x1 - shape.headlen * Math.cos(angle + Math.PI / 6),
+                    shape.y1 - shape.headlen * Math.sin(angle + Math.PI / 6)
+                );
+                this.ctx.stroke();
+                this.ctx.fillStyle = "blue";
+                this.ctx.beginPath();
+                this.ctx.arc(shape.x, shape.y, 4, 0, 2 * Math.PI);
+                this.ctx.arc(shape.x1, shape.y1, 4, 0, 2 * Math.PI);
+                this.ctx.fill();
             }
         }
     }

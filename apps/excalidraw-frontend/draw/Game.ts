@@ -110,6 +110,12 @@ export class Game {
         this.clicked = true;
         this.startX = e.clientX;
         this.startY = e.clientY;
+
+        if(this.S_shape === "doodle") {
+            this.ctx.beginPath();
+            this.prevX = e.clientX;
+            this.prevY = e.clientY;
+        }
     }
 
     handleMouseMove = (e: MouseEvent) => {
@@ -159,8 +165,8 @@ export class Game {
                     shape: JSON.stringify({
                         x: this.prevX,
                         y: this.prevY,
-                        x2: e.clientX,
-                        y2: e.clientY,
+                        x1: e.clientX,
+                        y1: e.clientY,
                         type: "line"
                     })
                 }))
@@ -248,8 +254,12 @@ export class Game {
             })
         }))
       } else if(this.S_shape === "doodle") {
-        this.ctx.stroke();
-        this.ctx.beginPath();
+        // this.ctx.stroke();
+        // this.ctx.beginPath();
+        this.ctx.closePath();
+        this.prevX = 0;
+        this.prevY = 0;
+        return;
       }
       this.drawShape();
     }

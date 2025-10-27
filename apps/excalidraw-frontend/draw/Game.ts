@@ -313,11 +313,53 @@ export class Game {
                     foundIndex = i;
                     break;
                 }
+            } else if(shape.type === "line") {
+                const dist = this.pointToLineDistance(x, y, shape.x, shape.y, shape.x1, shape.y1);
+                if(dist < 5) {
+                    console.log("Line clicked");
+                    foundIndex = i;
+                    break;
+                }
+            } else if(shape.type === "arrow") {
+                const dist = this.pointToLineDistance(x, y, shape.x, shape.y, shape.x1, shape.y1);
+                if(dist < 5) {
+                    console.log("arrow clicked");
+                    foundIndex = i;
+                    break;
+                }
             }
         }
 
         this.selectedShapeIndex = foundIndex;
         this.drawShape()
+    }
+
+    private pointToLineDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+        const A = px - x1;
+        const B = py - y1;
+        const C = x2 - x1;
+        const D = y2 - y1;
+
+        const dot = A * C + B * D;
+        const len_sq = C * C + D * D;
+        let param = -1;
+        if (len_sq !== 0) param = dot / len_sq;
+        let xx, yy;
+
+        if(param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if(param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        const dx = px - xx;
+        const dy = py - yy;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     drawShape() {
@@ -377,6 +419,16 @@ export class Game {
                 this.ctx.stroke();
             } else if(shape.type === "oval") {
                 this.drawEllipse(shape.x, shape.y, shape.width / 2 + 2, shape.height / 2 + 2);
+            } else if(shape.type === "line") {
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.x , shape.y);
+                this.ctx.lineTo(shape.x1 , shape.y1);
+                this.ctx.stroke();
+                this.ctx.fillStyle = "blue";
+                this.ctx.beginPath();
+                this.ctx.arc(shape.x , shape.y , 4 , 0 , 2 * Math.PI);
+                this.ctx.arc(shape.x1 , shape.y1 , 4 , 0 , 2 * Math.PI);
+                this.ctx.fill();
             }
         }
     }

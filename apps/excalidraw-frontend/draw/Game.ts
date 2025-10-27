@@ -172,6 +172,17 @@ export class Game {
                 }))
                 this.prevX = e.clientX;
                 this.prevY = e.clientY;
+            } else if(this.S_shape === "rhombus") {
+                this.ctx.strokeStyle = "white";
+                this.ctx.beginPath();
+                const midX = (this.startX + e.clientX) / 2;
+                const midY = (this.startY + e.clientY) / 2;
+                this.ctx.moveTo(midX , this.startY);
+                this.ctx.lineTo(e.clientX , midY);
+                this.ctx.lineTo(midX, e.clientY);
+                this.ctx.lineTo(this.startX, midY); 
+                this.ctx.closePath();
+                this.ctx.stroke();
             }
         }
     }
@@ -260,6 +271,18 @@ export class Game {
         this.prevX = 0;
         this.prevY = 0;
         return;
+      } else if(this.S_shape === "rhombus") {
+        this.socket.send(JSON.stringify({
+            type: "draw_shape",
+            roomId: this.roomId,
+            shape: JSON.stringify({
+                x1: this.startX,
+                y1: this.startY,
+                x2: e.clientX,
+                y2: e.clientY,
+                type: "rhombus"
+            })
+        }))
       }
       this.drawShape();
     }
@@ -344,6 +367,20 @@ export class Game {
         this.drawShape()
     }
 
+    private drawDiamond(x1: number , x2: number , y1: number , y2: number) {
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const width = Math.abs(x2 - x1);
+        const height = Math.abs(y2 - y1);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(midX , y1);
+        this.ctx.lineTo(x2 , midY);
+        this.ctx.lineTo(midX , y2);
+        this.ctx.lineTo(x1 , midY);
+        this.ctx.closePath();
+    }
+
     private pointToLineDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
         const A = px - x1;
         const B = py - y1;
@@ -413,6 +450,10 @@ export class Game {
                  this.ctx.font = `${item.fontSize || 20}px Arial`;
                  this.ctx.textBaseline = "top",
                  this.ctx.fillText(item.text , item.x , item.y);
+            } else if(item.type === "rhombus") {
+                this.ctx.strokeStyle = "white";
+                this.drawDiamond(item.x1 , item.x2 , item.y1 , item.y2);
+                this.ctx.stroke();
             }
         })
 

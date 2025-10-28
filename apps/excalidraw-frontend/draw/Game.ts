@@ -1,5 +1,6 @@
 import { hrtime } from "process";
 import getExistingShapes from "./existingShapes";
+import { act } from "react";
 
 export class Game {
     private canvas: HTMLCanvasElement;
@@ -19,6 +20,8 @@ export class Game {
     private prevY: number = 0;
     private selectedShapes: any[] = [];
     private selectedShapeIndex: number | null = null;
+    private clipboardShape: any = null;
+    private contextMenu: HTMLElement | null = null; 
 
     constructor(canvas: HTMLCanvasElement, S_shape: string, roomId: string , socket: WebSocket) {
         this.canvas = canvas;
@@ -32,6 +35,13 @@ export class Game {
             this.init();
             this.initHandlers();
         }
+
+        this.contextMenu = document.getElementById("context-menu");
+        if(this.contextMenu) {
+            this.contextMenu.addEventListener("click" , this.handleContextMenuClick);
+        }
+        this.canvas.addEventListener("contextmenu" , this.handleRightClick);
+        document.addEventListener("click", () => this.hideContextMenu());
 
         const deleteBtn = document.getElementById("delete-btn");
         if(deleteBtn) {
@@ -402,6 +412,53 @@ export class Game {
 
         this.selectedShapeIndex = foundIndex;
         this.drawShape()
+    }
+
+    handleRightClick = (e: MouseEvent) => {
+        e.preventDefault();
+        if(this.selectedShapeIndex == null) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if(this.contextMenu) {
+            this.contextMenu.style.display = "block";
+            this.contextMenu.style.left = `${x}px`;
+            this.contextMenu.style.top = `${y}px`;
+        }
+    }
+
+    hideContextMenu() {
+        if (this.contextMenu) this.contextMenu.style.display = "none";
+    }
+
+    handleContextMenuClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const action = target.getAttribute("data-action");
+        if(!action) return;
+        if(action === "cut") {
+            if(this.selectedShapeIndex != null) {
+                this.clipboardShape = { ...this.Shape[this.selectedShapeIndex] };
+                this.Shape.splice(this.selectedShapeIndex, 1);
+                this.selectedShapeIndex = null;
+                this.drawShape();
+            }
+        } else if(action === "copy") {
+            if(this.selectedShapeIndex != null) {
+                this.clipboardShape = { ...this.Shape[this.selectedShapeIndex] };
+            }
+        } else if(action === "paste") {
+            if(this.clipboardShape) {
+                const newShape = { ...this.clipboardShape };
+                if ("x" in newShape) newShape.x += 20;
+                if ("y" in newShape) newShape.y += 20;
+                if ("x1" in newShape) newShape.x1 += 20;
+                if ("y1" in newShape) newShape.y1 += 20;
+                this.Shape.push(newShape);
+                this.selectedShapeIndex = this.Shape.length - 1;
+                this.drawShape();
+            }
+        }
+        this.hideContextMenu();
     }
 
     private drawDiamond(x1: number , x2: number , y1: number , y2: number) {

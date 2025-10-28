@@ -1,3 +1,4 @@
+import { hrtime } from "process";
 import getExistingShapes from "./existingShapes";
 
 export class Game {
@@ -126,7 +127,8 @@ export class Game {
             this.drawShape();
             if(this.S_shape === "rect") {
                 this.ctx.strokeStyle = "white";
-                this.ctx.strokeRect(this.startX , this.startY , this.width , this.height);
+                this.drawRoundedRect(this.startX, this.startY, this.width, this.height, 10);
+                this.ctx.stroke();
             } else if(this.S_shape === "circle") {
                 this.ctx.strokeStyle = "white";
                 this.ctx.beginPath();
@@ -444,6 +446,52 @@ export class Game {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    private drawRoundedRect(x: number , y: number , width: number , height: number , radius: number = 10) {
+        const r = Math.min(radius, Math.abs(width) / 2, Math.abs(height) / 2);
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + r, y);
+        this.ctx.lineTo(x + width - r, y);
+        this.ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        this.ctx.lineTo(x + width, y + height - r);
+        this.ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        this.ctx.lineTo(x + r, y + height);
+        this.ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        this.ctx.lineTo(x, y + r);
+        this.ctx.quadraticCurveTo(x, y, x + r, y);
+        this.ctx.closePath();
+    }
+
+    private getBoundingBox(shape: any) {
+        if(shape.type === "rect") {
+            return {
+                x: shape.x,
+                y: shape.y,
+                width: shape.width,
+                height: shape.height
+            };
+        } else if(shape.type === "circle") {
+            return {
+                x: shape.x - shape.radius,
+                y: shape.y - shape.radius,
+                width: shape.radius * 2,
+                height: shape.radius * 2
+            };
+        } else if(shape.type === "oval") {
+            return {
+                x: shape.x - Math.abs(shape.width / 2),
+                y: shape.y - Math.abs(shape.height / 2),
+                width: Math.abs(shape.width),
+                height: Math.abs(shape.height)
+            }
+        } else if(shape.type === "rhombus") {
+            const xMin = Math.min(shape.x1, shape.x2);
+            const yMin = Math.min(shape.y1, shape.y2);
+            const width = Math.abs(shape.x2 - shape.x1);
+            const height = Math.abs(shape.y2 - shape.y1);
+            return { x: xMin, y: yMin, width, height };
+        }
+    }
+
     drawShape() {
         console.log("draw shape");
         this.ctx.clearRect(0 , 0 , this.canvas.width , this.canvas.height);
@@ -452,7 +500,8 @@ export class Game {
         this.Shape.map((item) => {
             if(item.type === "rect") {
                 this.ctx.strokeStyle = "white";
-                this.ctx.strokeRect(item.x , item.y , item.width , item.height);
+                this.drawRoundedRect(item.x, item.y, item.width, item.height, 10);
+                this.ctx.stroke();
             } else if(item.type === "circle") {
                 this.ctx.strokeStyle = "white";
                 this.ctx.beginPath();
@@ -497,14 +546,11 @@ export class Game {
             this.ctx.strokeStyle = "blue";
             this.ctx.lineWidth = 2;
 
-            if(shape.type === "rect") {
-                this.ctx.strokeRect(shape.x - 2, shape.y - 2, shape.width + 4, shape.height + 4);
-            } else if(shape.type === "circle") {
-                this.ctx.beginPath();
-                this.ctx.arc(shape.x, shape.y, shape.radius + 2, 0, 2 * Math.PI);
-                this.ctx.stroke();
-            } else if(shape.type === "oval") {
-                this.drawEllipse(shape.x, shape.y, shape.width / 2 + 2, shape.height / 2 + 2);
+            if(["rect" , "circle" , "oval" , "rhombus"].includes(shape.type)) {
+                const bbox = this.getBoundingBox(shape);
+                if(bbox) {
+                    this.ctx.strokeRect(bbox.x - 4, bbox.y - 4, bbox.width + 8, bbox.height + 8);
+                }
             } else if(shape.type === "line") {
                 this.ctx.beginPath();
                 this.ctx.moveTo(shape.x , shape.y);
@@ -537,10 +583,6 @@ export class Game {
                 this.ctx.arc(shape.x, shape.y, 4, 0, 2 * Math.PI);
                 this.ctx.arc(shape.x1, shape.y1, 4, 0, 2 * Math.PI);
                 this.ctx.fill();
-            } else if(shape.type === "rhombus") {
-                this.ctx.strokeStyle = "blue";
-                this.drawDiamond(shape.x1 , shape.x2 , shape.y1 , shape.y2);
-                this.ctx.stroke();
             } else if(shape.type === "text") {
                 this.ctx.font = `${shape.fontSize || 20}px Arial`;
                 const textWidth = this.ctx.measureText(shape.text).width;

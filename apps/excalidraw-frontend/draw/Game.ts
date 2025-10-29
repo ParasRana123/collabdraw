@@ -1,6 +1,4 @@
-import { hrtime } from "process";
 import getExistingShapes from "./existingShapes";
-import { act } from "react";
 
 export class Game {
     private canvas: HTMLCanvasElement;

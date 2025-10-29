@@ -25,162 +25,123 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
     };
   }, []);
 
+  const buttonStyle = (isActive: boolean) => ({
+    padding: "10px",
+    margin: "0 2px",
+    border: isActive ? "2px solid #6965db" : "1px solid #e9ecef",
+    borderRadius: "6px",
+    backgroundColor: isActive ? "#f5f5ff" : "white",
+    color: "#1e1e1e",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    fontSize: "18px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "40px",
+    height: "40px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  });
+
   if (!socket) {
     return <div>Connecting to the server...</div>;
   }
 
   return (
     <div>
-      <button
+      <div
         style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "rect" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "rect" ? setShape("rect") : setShape("null");
+          padding: "10px 16px",
+          backgroundColor: "#ffffff",
+          borderBottom: "1px solid #e9ecef",
+          display: "flex",
+          justifyContent: "center", 
+          alignItems: "center",
+          gap: "6px",
+          height: "60px",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
         }}
       >
-        Rectangle
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "circle" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "circle" ? setShape("circle") : setShape("null");
-        }}
-      >
-        Circle
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "line" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "line" ? setShape("line") : setShape("null");
-        }}
-      >
-        Line
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "arrow" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "arrow" ? setShape("arrow") : setShape("null");
-        }}
-      >
-        Arrow
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "oval" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "oval" ? setShape("oval") : setShape("null");
-        }}
-      >
-        Oval
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "text" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "text" ? setShape("text") : setShape("null");
-        }}
-      >
-        Text
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "doodle" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "doodle" ? setShape("doodle") : setShape("null");
-        }}
-      >
-        Doodle
-      </button>
-      <button
-        style={{
-          padding: "8px 16px",
-          margin: "0 5px",
-          border: "none",
-          borderRadius: "20px",
-          backgroundColor: shape === "rhombus" ? "#4CAF50" : "#555",
-          color: "white",
-          cursor: "pointer",
-          transition: "background-color 0.3s",
-        }}
-        onClick={() => {
-          shape !== "rhombus" ? setShape("rhombus") : setShape("null");
-        }}
-      >
-        Diamond
-      </button>
-      <button
-        style={{
-          cursor: "pointer",
-          borderRadius: "4px",
-          padding: "6px 12px",
-          backgroundColor: "#d32f2f",
-          color: "white",
-          border: "none",
-          margin: "0 5px",
-        }}
-        id="delete-btn"
-      >
-        Delete
-      </button>
+        <button
+          style={buttonStyle(shape === "rect")}
+          onClick={() => setShape(shape !== "rect" ? "rect" : "null")}
+          title="Rectangle"
+        >
+          ▭
+        </button>
+        <button
+          style={buttonStyle(shape === "circle")}
+          onClick={() => setShape(shape !== "circle" ? "circle" : "null")}
+          title="Circle"
+        >
+          ○
+        </button>
+        <button
+          style={buttonStyle(shape === "line")}
+          onClick={() => setShape(shape !== "line" ? "line" : "null")}
+          title="Line"
+        >
+          ╱
+        </button>
+        <button
+          style={buttonStyle(shape === "arrow")}
+          onClick={() => setShape(shape !== "arrow" ? "arrow" : "null")}
+          title="Arrow"
+        >
+          →
+        </button>
+        <button
+          style={buttonStyle(shape === "oval")}
+          onClick={() => setShape(shape !== "oval" ? "oval" : "null")}
+          title="Oval"
+        >
+          ⬭
+        </button>
+        <button
+          style={buttonStyle(shape === "text")}
+          onClick={() => setShape(shape !== "text" ? "text" : "null")}
+          title="Text"
+        >
+          T
+        </button>
+        <button
+          style={buttonStyle(shape === "doodle")}
+          onClick={() => setShape(shape !== "doodle" ? "doodle" : "null")}
+          title="Draw"
+        >
+          ✎
+        </button>
+        <button
+          style={buttonStyle(shape === "rhombus")}
+          onClick={() => setShape(shape !== "rhombus" ? "rhombus" : "null")}
+          title="Diamond"
+        >
+          ◇
+        </button>
+
+        <div
+          style={{
+            width: "1px",
+            height: "30px",
+            backgroundColor: "#e9ecef",
+            margin: "0 8px",
+          }}
+        />
+
+        <button
+          style={{
+            ...buttonStyle(false),
+            backgroundColor: "#ff6b6b",
+            color: "white",
+            border: "1px solid #ff5252",
+          }}
+          id="delete-btn"
+          title="Delete"
+        >
+          🗑
+        </button>
+      </div>
+
       <div
         id="context-menu"
         style={{
@@ -195,28 +156,17 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
           width: "120px",
         }}
       >
-        <div
-          className="menu-item"
-          data-action="cut"
-          style={{ padding: "8px", cursor: "pointer" }}
-        >
+        <div className="menu-item" data-action="cut" style={{ padding: "8px", cursor: "pointer" }}>
           ✂️ Cut
         </div>
-        <div
-          className="menu-item"
-          data-action="copy"
-          style={{ padding: "8px", cursor: "pointer" }}
-        >
+        <div className="menu-item" data-action="copy" style={{ padding: "8px", cursor: "pointer" }}>
           📋 Copy
         </div>
-        <div
-          className="menu-item"
-          data-action="paste"
-          style={{ padding: "8px", cursor: "pointer" }}
-        >
+        <div className="menu-item" data-action="paste" style={{ padding: "8px", cursor: "pointer" }}>
           📎 Paste
         </div>
       </div>
+
       <Canvas roomId={roomId} socket={socket} S_shape={shape} />
     </div>
   );

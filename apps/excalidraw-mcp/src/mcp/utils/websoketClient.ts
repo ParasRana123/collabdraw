@@ -7,13 +7,13 @@ export function connectToBackend() {
     if(ws) return ws;
     ws = new WebSocket(`${BACKEND_WS_URL}?token=${JWT_TOKEN}`);
     ws.on("open" , () => {
-        console.log("Connect to the ws drawing backend");
+        // console.error("Connect to the ws drawing backend");
     })
     ws.on("message" , (msg) => {
-        console.log("Message: " , msg.toString());
+        // console.error("Message: " , msg.toString());
     })
     ws.on("close", () => {
-        console.log("[MCP] Disconnected, retrying...");
+        // console.error("[MCP] Disconnected, retrying...");
         setTimeout(connectToBackend, 2000);
     });
 
@@ -22,7 +22,7 @@ export function connectToBackend() {
 
 export function sendToBackend(data: object) {
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    console.error("[MCP] WebSocket not ready");
+    // console.error("[MCP] WebSocket not ready");
     return;
   }
   ws.send(JSON.stringify(data));

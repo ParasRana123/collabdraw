@@ -104,21 +104,6 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
 
-  apps/excalidraw_mcp:
-    dependencies:
-      '@types/dotenv':
-        specifier: ^8.2.3
-        version: 8.2.3
-      '@types/typescript':
-        specifier: ^2.0.0
-        version: 2.0.0
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.2.3
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
   apps/http-backend:
     dependencies:
       '@types/cors':
